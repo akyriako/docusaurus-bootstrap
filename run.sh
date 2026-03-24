@@ -22,9 +22,19 @@ mkdir -p "$WORKDIR"
 cd "$WORKDIR"
 
 echo "Scaffolding Docusaurus site..."
-npx create-docusaurus@latest "$SITE_NAME" "$TEMPLATE" --package-manager npm
+npx create-docusaurus@latest "$SITE_NAME" "$TEMPLATE" --typescript --package-manager npm
 
 cd "$SITE_NAME"
+
+echo "Adding devcontainer..."
+mkdir -p .devcontainer
+
+if [ -f /devcontainer.json ]; then
+  cp /devcontainer.json .devcontainer/devcontainer.json
+  sed -i "s/\"name\": *\"[^\"]*\"/\"name\": \"${SITE_NAME}\"/" .devcontainer/devcontainer.json
+else
+  echo "WARNING: /devcontainer.json not found, skipping"
+fi
 
 echo "Initializing git..."
 git init
@@ -64,7 +74,7 @@ else
 fi
 
 echo "Pushing to remote..."
-git remote add origin "${BASE_URL}/${GIT_OWNER}/${REPO_NAME}.git"
+git remote add origin "${GITEA_PROTOCOL}://${GIT_USERNAME}:${GITEA_TOKEN}@${GITEA_HOST}/${GIT_OWNER}/${REPO_NAME}.git"
 git push -u origin "$DEFAULT_BRANCH"
 
 echo "Done."
