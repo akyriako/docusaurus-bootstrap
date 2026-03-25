@@ -40,7 +40,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm install",
+	"postCreateCommand": "npm install"
 
 	// "runArgs": [
     //     "--env-file", "${localWorkspaceFolder}/.devcontainer/.env"

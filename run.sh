@@ -36,6 +36,15 @@ else
   echo "WARNING: /devcontainer.json not found, skipping"
 fi
 
+echo "Adding Dockerfile..."
+cp /docusaurus.dockerfile Dockerfile
+
+echo "Adding GitHub Workflows..."
+mkdir -p .github/workflows
+
+cp /check.workflow.github .github/workflows/check.yaml
+cp /build.workflow.github .github/workflows/build.yaml
+
 echo "Initializing git..."
 git init
 git config user.name "$GIT_USERNAME"
