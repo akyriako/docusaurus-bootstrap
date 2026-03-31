@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: space-${META_NAME}
+  namespace: ${META_NAMESPACE}
+spec:
+  selector:
+    app.kubernetes.io/name: space-${META_NAME}
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

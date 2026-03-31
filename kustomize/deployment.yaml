@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: space-${META_NAME}
+  namespace: ${META_NAMESPACE}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: space-${META_NAME}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: space-${META_NAME}
+        app.kubernetes.io/component: web
+    spec:
+      containers:
+        - name: docusaurus
+          image: ${REGISTRY}/${REGISTRY_ORG}/${SITE_NAME}:latest # {"$imagepolicy": "default:latest"}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

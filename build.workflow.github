@@ -55,7 +55,8 @@ jobs:
               ${{ vars.REGISTRY }}/${{ vars.REGISTRY_ORG }}/${{ steps.repo_name.outputs.name }}
             tags: |
               type=raw,value=${{ steps.build_image_tag.outputs.image_version }}
-    
+              type=raw,value=latest
+
         - name: Build App
           env: 
             REACT_APP_VERSION: ${{ steps.build_image_tag.outputs.image_version }}

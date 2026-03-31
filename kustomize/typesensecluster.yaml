@@ -1,0 +1,13 @@
+apiVersion: ts.opentelekomcloud.com/v1alpha1
+kind: TypesenseCluster
+metadata:
+  name: space-${META_NAME}
+  namespace: ${META_NAMESPACE}
+spec:
+  image: typesense/typesense:30.0
+  replicas: 1
+  storage:
+    storageClassName: standard
+  ingress:
+    host: typesense.apps.proxmox.home
+    ingressClassName: traefik

@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: space-${META_NAME}
+  namespace: ${META_NAMESPACE}
+spec:
+  ingressClassName: ${INGRESS_CLASS_NAME}
+  rules:
+    - host: ${EXPOSE_URL}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: space-${META_NAME}
+                port:
+                  number: 3000

@@ -10,6 +10,8 @@ COPY docusaurus.dockerfile /docusaurus.dockerfile
 COPY check.workflow.github /check.workflow.github
 COPY build.workflow.github /build.workflow.github
 
+COPY kustomize/ /kustomize
+
 RUN chmod +x /run.sh
 
 ENTRYPOINT ["/run.sh"]

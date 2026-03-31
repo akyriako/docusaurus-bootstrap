@@ -5,10 +5,16 @@ set -euo pipefail
 : "${GITEA_TOKEN:?missing GITEA_TOKEN}"
 : "${GIT_OWNER:?missing GIT_OWNER}"
 : "${REPO_NAME:?missing REPO_NAME}"
+: "${REGISTRY:?missing REGISTRY}"
+: "${REGISTRY_ORG:?missing REGISTRY_ORG}"
+: "${EXPOSE_URL:?missing EXPOSE_URL}"
+: "${INGRESS_CLASS_NAME:?missing INGRESS_CLASS_NAME}"
 
 GITEA_PROTOCOL="${GITEA_PROTOCOL:-https}"
 
 SITE_NAME="${SITE_NAME:-$REPO_NAME}"
+META_NAME="space-${SITE_NAME}"
+META_NAMESPACE="${META_NAMESPACE:-default}"
 TEMPLATE="${TEMPLATE:-classic}"
 WORKDIR="${WORKDIR:-/tmp/work}"
 DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
@@ -44,6 +50,31 @@ mkdir -p .github/workflows
 
 cp /check.workflow.github .github/workflows/check.yaml
 cp /build.workflow.github .github/workflows/build.yaml
+
+echo "Adding Manifests..."
+mkdir -p deploy/manifests
+
+if [ -d "/kustomize" ]; then
+  cp -r /kustomize/. deploy/manifests/
+else
+  echo "ERROR: kustomize folder not found" >&2
+  exit 1
+fi
+
+echo "Updating Kubernetes manifests..."
+
+# Replace name, app.kubernetes.io/name, and namespace in all YAML files
+find deploy/manifests -name "*.yaml" -o -name "*.yml" | while read -r file; do
+  sed -i "s/name: space-[^ ]*/name: ${META_NAME}/g" "$file"
+  sed -i "s/app\.kubernetes\.io\/name: space-[^ ]*/app.kubernetes.io\/name: ${META_NAME}/g" "$file"
+  sed -i "s/app\.kubernetes\.io\/part-of: space-[^ ]*/app.kubernetes.io\/name: ${META_NAME}/g" "$file"
+  sed -i "s/namespace: [^ ]*/namespace: ${META_NAMESPACE}/g" "$file"
+  sed -i "s|image: [^ ]*|image: ${REGISTRY}/${REGISTRY_ORG}/${REPO_NAME}:latest|g" "$file"
+  sed -i "s/host: \${EXPOSE_URL}/host: ${EXPOSE_URL}/g" "$file"
+  sed -i "s/ingressClassName: \${INGRESS_CLASS_NAME}/ingressClassName: ${INGRESS_CLASS_NAME}/g" "$file"
+done
+
+echo "Kubernetes manifests updated with META_NAME=${META_NAME}, META_NAMESPACE=${META_NAMESPACE}"
 
 echo "Initializing git..."
 git init
